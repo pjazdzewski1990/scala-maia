@@ -3,6 +3,7 @@
 
 lazy val commonSettings = Seq(
   version := "1.0",
+  organization := "com.jspha",
   scalaVersion := "2.12.1",
   scalacOptions ++= Seq(
     "-target:jvm-1.8",
@@ -12,7 +13,7 @@ lazy val commonSettings = Seq(
     "-Ywarn-numeric-widen"
   ),
   licenses := Seq("MPLv2" -> url("http://mozilla.org/MPL/2.0/")),
-  homepage := Some(url("http://github.com/tel/scala-maia")),
+  homepage := Some(url("http://github.com/MaiaOrg/scala-maia")),
   resolvers += Resolver.sonatypeRepo("releases"),
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
   wartremoverErrors ++= Warts.allBut(
