@@ -13,13 +13,7 @@ lazy val commonSettings = Seq(
   licenses := Seq("MPLv2" -> url("http://mozilla.org/MPL/2.0/")),
   homepage := Some(url("http://github.com/MaiaOrg/scala-maia")),
   resolvers += Resolver.sonatypeRepo("releases"),
-  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
-  wartremoverErrors ++= Warts.allBut(
-    Wart.Any,
-    Wart.AsInstanceOf,
-    Wart.ExplicitImplicitTypes,
-    Wart.Nothing
-  )
+  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 )
 
 val catsVersion = "0.9.0"
@@ -36,16 +30,24 @@ lazy val server = project
   .dependsOn(sharedJvm)
   .settings(
     libraryDependencies ++= Seq(
-      "org.http4s" %% "http4s-dsl" % http4sVersion
+      "org.slf4j" % "slf4j-simple" % "1.6.4",
+      "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "org.http4s" %% "http4s-blaze-server" % http4sVersion
     )
   )
   .settings( // bring ui compiled artifacts in to resources
-    (resources in Compile) <+= Def.task {
-      (artifactPath in (ui, Compile, fullOptJS)).value
-    } dependsOn (fullOptJS in (ui, Compile)),
-    (resources in Compile) <+= Def.task {
-      (artifactPath in (ui, Compile, packageMinifiedJSDependencies)).value
-    } dependsOn (fullOptJS in (ui, Compile))
+    (resources in Compile) += Def
+      .task {
+        (artifactPath in (ui, Compile, fullOptJS)).value
+      }
+      .dependsOn(fullOptJS in (ui, Compile))
+      .value,
+    (resources in Compile) += Def
+      .task {
+        (artifactPath in (ui, Compile, packageMinifiedJSDependencies)).value
+      }
+      .dependsOn(fullOptJS in (ui, Compile))
+      .value
   )
 
 lazy val shared = crossProject
@@ -71,5 +73,7 @@ lazy val ui = project
   .settings(workbenchSettings)
   .settings(
     bootSnippet := "jspha.qubit.ui.Runtime().main();",
-    refreshBrowsers <<= refreshBrowsers.triggeredBy(fastOptJS in Compile)
+    refreshBrowsers := {
+      refreshBrowsers.triggeredBy(fastOptJS in Compile).value
+    }
   )
