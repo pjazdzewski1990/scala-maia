@@ -9,7 +9,7 @@ Kick things off with
 
 ```
 > sbt
-> ~ ;fastOptJS ;server/re-start
+> ~ ;exampleAppUi/fastOptJS ;exampleAppServer/re-start
 ```
 
 The "development" page is available at
