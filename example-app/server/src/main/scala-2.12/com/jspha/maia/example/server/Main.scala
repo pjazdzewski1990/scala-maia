@@ -4,11 +4,16 @@
 
 package com.jspha.maia.example.server
 
+import com.jspha.maia._
+import com.jspha.maia.example.api.TopLevel
+import com.jspha.maia.http4s.ApiEndpoint
+import fs2.interop.cats._
+import fs2.{Stream, Task}
 import org.http4s._
 import org.http4s.dsl._
 import org.http4s.server.blaze._
 import org.http4s.util.StreamApp
-import fs2.{Stream, Task}
+import org.http4s.server.middleware._
 
 object Main extends StreamApp {
 
@@ -29,12 +34,19 @@ object Main extends StreamApp {
     }
   }
 
+  val apiService: ApiEndpoint[Task, TopLevel] =
+    ApiEndpoint[TopLevel](
+      TopLevel[Fields.Fetcher[Task]](
+        getCount = Task.now(Right(0))
+      )
+    )
+
   def main(args: List[String]): Stream[Task, Unit] = {
     BlazeBuilder
       .bindHttp(8080, "localhost")
       .mountService(indexService, "/")
       .mountService(staticResourcesService, "/static")
-      .mountService(ApiService.service, "/api")
+      .mountService(CORS(apiService.service), "/api")
       .serve
   }
 

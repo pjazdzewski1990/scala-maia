@@ -6,6 +6,6 @@ package com.jspha.maia.example.api
 
 import com.jspha.maia._
 
-case class Root[F <: Fields](
+case class TopLevel[F <: Fields](
   getCount: F#Atom[Int]
 )

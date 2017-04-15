@@ -8,6 +8,7 @@ val uTestVersion = "0.4.5"
 
 val http4sVersion = "0.17.0-SNAPSHOT"
 val fs2Version = "0.9.4"
+val fs2CatsVersion = "0.3.0"
 
 lazy val commonSettings = Seq(
   version := "1.0",
@@ -36,7 +37,13 @@ lazy val commonSettings = Seq(
 
 lazy val root = project
   .in(file("."))
-  .aggregate(maiaJS, maiaJVM)
+  .aggregate(maiaJS,
+             maiaJVM,
+             maiaHttp4s,
+             exampleAppSharedJS,
+             exampleAppSharedJVM,
+             exampleAppUi,
+             exampleAppServer)
   .settings(
     publish := {},
     publishLocal := {}
@@ -57,7 +64,8 @@ lazy val maia = crossProject
       Wart.Any,
       Wart.AsInstanceOf,
       Wart.ExplicitImplicitTypes,
-      Wart.Nothing
+      Wart.Nothing,
+      Wart.Overloading
     )
   )
 
@@ -71,6 +79,30 @@ testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle
   .toTask("")
   .value
 (test in Test) := ((test in Test) dependsOn testScalastyle).value
+
+// ----------------------------------------------------------------------------
+// Auxiliary Libraries
+
+lazy val maiaHttp4s = project
+  .in(file("maia-http4s"))
+  .dependsOn(maiaJVM)
+  .settings(commonSettings: _*)
+  .settings(
+    name := "maia-http4s",
+    wartremoverErrors ++= Warts.allBut(
+      Wart.Any,
+      Wart.AsInstanceOf,
+      Wart.ExplicitImplicitTypes,
+      Wart.Nothing,
+      Wart.Overloading
+    ),
+    libraryDependencies ++= Seq(
+      "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "co.fs2" %% "fs2-cats" % fs2CatsVersion,
+      "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+      "org.http4s" %% "http4s-circe" % http4sVersion
+    )
+  )
 
 // ----------------------------------------------------------------------------
 // Example App
@@ -97,7 +129,8 @@ lazy val exampleAppUi = project
   .settings(
     skip in packageJSDependencies := false,
     libraryDependencies ++= Seq(
-      )
+      "fr.hmil" %%% "roshttp" % "2.0.1"
+    )
   )
   .settings(workbenchSettings)
   .settings(
@@ -111,12 +144,13 @@ lazy val exampleAppServer = project
   .in(file("example-app/server"))
   .settings(commonSettings: _*)
   .dependsOn(maiaJVM)
+  .dependsOn(maiaHttp4s)
   .dependsOn(exampleAppSharedJVM)
   .settings(
     libraryDependencies ++= Seq(
       "org.slf4j" % "slf4j-simple" % "1.6.4",
       "org.http4s" %% "http4s-dsl" % http4sVersion,
-      "co.fs2" %% "fs2-cats" % "0.3.0",
+      "co.fs2" %% "fs2-cats" % fs2CatsVersion,
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion
     )

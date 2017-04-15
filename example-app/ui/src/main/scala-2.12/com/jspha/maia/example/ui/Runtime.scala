@@ -6,7 +6,36 @@ package com.jspha.maia.example.ui
 
 import scala.scalajs.js.JSApp
 
+import fr.hmil.roshttp.HttpRequest
+import monix.execution.Scheduler.Implicits.global
+import scala.util.{Failure, Success}
+import fr.hmil.roshttp.response.SimpleHttpResponse
+import fr.hmil.roshttp.Protocol.HTTP
+import fr.hmil.roshttp.body.Implicits._
+import fr.hmil.roshttp.body.JSONBody._
+
 object Runtime extends JSApp {
-  def main(): Unit =
-    println("Hello world")
+
+  val request =
+    HttpRequest()
+      .withProtocol(HTTP)
+      .withHost("localhost")
+      .withPort(8080)
+      .withPath("/api")
+
+  def main(): Unit = {
+    println("Loaded!!!")
+    request
+      .post(
+        JSONObject(
+          "getCount" -> new JSONValue {
+            override def toString() = "true"
+          }
+        ))
+      .onComplete({
+        case res: Success[SimpleHttpResponse] => println(res.get.body)
+        case _: Failure[SimpleHttpResponse] =>
+          println("Huston, we got a problem!")
+      })
+  }
 }
