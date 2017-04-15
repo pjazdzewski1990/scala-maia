@@ -15,7 +15,7 @@ import org.http4s.server.blaze._
 import org.http4s.util.StreamApp
 import org.http4s.server.middleware._
 
-object Main extends StreamApp {
+object Runtime extends StreamApp {
 
   val indexService = HttpService {
     case req @ GET -> Root =>
