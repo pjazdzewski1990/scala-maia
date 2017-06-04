@@ -41,7 +41,7 @@ object Runtime extends StreamApp {
       )
     )
 
-  def stream(args: List[String]): Stream[Task, Unit] = {
+  def stream(args: List[String]): Stream[Task, Nothing] = {
     BlazeBuilder
       .bindHttp(8080, "localhost")
       .mountService(indexService, "/")
